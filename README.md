@@ -1,1 +1,1 @@
-# hex_generator
+# Hex Generator
