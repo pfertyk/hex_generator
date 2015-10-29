@@ -2,7 +2,6 @@ from collections import namedtuple
 import math
 from svgwrite import Drawing
 
-
 Hexagon = namedtuple('Hex', 'vertices type')
 
 
@@ -29,39 +28,36 @@ def generate_rhomboidal_board(width=5, height=5):
     return [[1] * height for _ in range(width)]
 
 
-def save_board_to_file(board, file_name):
-    board = zip(*board)
+def write_board_to_text_file(board, file_name):
+    max_len = max(len(row) for row in board)
+    for column in board:
+        while len(column) < max_len:
+            column.append(0)
+
+    board = [list(row) for row in zip(*board)]
     with open(file_name, 'w') as board_file:
         for row in board:
             line = ' '.join(str(field) for field in row)
             board_file.write(line + '\n')
 
 
-def load_board_from_file(file_name):
-    with open(file_name) as f:
-        lines = f.readlines()
-    board = []
-    for line in lines:
-        board.append([int(x) for x in line.split(' ')])
+def read_board_from_text_file(file_name):
+    with open(file_name) as board_file:
+        lines = board_file.readlines()
+    board = [[int(x) for x in line.split(' ')] for line in lines]
+    max_len = max(len(row) for row in board)
+    for row in board:
+        while len(row) < max_len:
+            row.append(0)
     board = [list(x) for x in zip(*board)]
     return board
         
 
-def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_offset=None, pointy_top=True, trim_board=True):
+def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board_offset=None, pointy_top=True, trim_board=True):
     if board_offset is None:
         board_offset = hex_radius
     svg_image = Drawing(file_name)
-    svg_image.add(svg_image.style('.background { fill: white }'))
-    svg_image.add(svg_image.style('.hex_type_0 { fill: black }'))
-    svg_image.add(svg_image.style('.hex_type_1 { fill: white; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_2 { fill: blue; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_3 { fill: green; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_4 { fill: yellow; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_5 { fill: gray; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_6 { fill: lime; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_7 { fill: red; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_8 { fill: purple; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_9 { fill: pink; stroke-width: 1; stroke: black }'))
+    add_default_styles_to_svg(svg_image)
 
     hexagons = get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board)
     all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
@@ -81,6 +77,20 @@ def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_off
         svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex_type_' + str(hexagon.type)))
     svg_image.save()
     return svg_image
+
+
+def add_default_styles_to_svg(svg_image):
+    svg_image.add(svg_image.style('.background { fill: white }'))
+    svg_image.add(svg_image.style('.hex_type_0 { fill: black }'))
+    svg_image.add(svg_image.style('.hex_type_1 { fill: white; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_2 { fill: blue; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_3 { fill: green; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_4 { fill: yellow; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_5 { fill: gray; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_6 { fill: lime; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_7 { fill: red; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_8 { fill: purple; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_9 { fill: pink; stroke-width: 1; stroke: black }'))
 
 
 def get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board=True):
@@ -118,4 +128,4 @@ def calculate_one_hex_vertices(coordinates, hex_radius, pointy_top):
 
 if __name__ == "__main__":
     simple_board = generate_triangular_board()
-    export_board_to_svg(simple_board, 'board.svg')
+    write_board_to_svg_file(simple_board, 'board.svg')
