@@ -29,11 +29,10 @@ def generate_rhomboidal_board(width=5, height=5):
 
 
 def write_board_to_text_file(board, file_name):
-    max_len = max(len(row) for row in board)
+    max_len = max(len(column) for column in board)
     for column in board:
         while len(column) < max_len:
             column.append(0)
-
     board = [list(row) for row in zip(*board)]
     with open(file_name, 'w') as board_file:
         for row in board:
@@ -44,7 +43,7 @@ def write_board_to_text_file(board, file_name):
 def read_board_from_text_file(file_name):
     with open(file_name) as board_file:
         lines = board_file.readlines()
-    board = [[int(x) for x in line.split(' ')] for line in lines]
+    board = [[int(x) for x in line.split()] for line in lines]
     max_len = max(len(row) for row in board)
     for row in board:
         while len(row) < max_len:
@@ -74,23 +73,24 @@ def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board
     for hexagon in hexagons:
         vertices = [(v[0] + x_offset, v[1] + y_offset) for v in hexagon.vertices]
         hexagon = Hexagon(vertices, hexagon.type)
-        svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex_type_' + str(hexagon.type)))
+        svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex-field hex-field-' + str(hexagon.type)))
     svg_image.save()
     return svg_image
 
 
 def add_default_styles_to_svg(svg_image):
     svg_image.add(svg_image.style('.background { fill: white }'))
-    svg_image.add(svg_image.style('.hex_type_0 { fill: black }'))
-    svg_image.add(svg_image.style('.hex_type_1 { fill: white; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_2 { fill: blue; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_3 { fill: green; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_4 { fill: yellow; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_5 { fill: gray; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_6 { fill: lime; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_7 { fill: red; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_8 { fill: purple; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex_type_9 { fill: pink; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex-field { stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex-field-0 { fill: black }'))
+    svg_image.add(svg_image.style('.hex-field-1 { fill: white }'))
+    svg_image.add(svg_image.style('.hex-field-2 { fill: blue }'))
+    svg_image.add(svg_image.style('.hex-field-3 { fill: green }'))
+    svg_image.add(svg_image.style('.hex-field-4 { fill: yellow }'))
+    svg_image.add(svg_image.style('.hex-field-5 { fill: gray }'))
+    svg_image.add(svg_image.style('.hex-field-6 { fill: lime }'))
+    svg_image.add(svg_image.style('.hex-field-7 { fill: red }'))
+    svg_image.add(svg_image.style('.hex-field-8 { fill: purple }'))
+    svg_image.add(svg_image.style('.hex-field-9 { fill: pink }'))
 
 
 def get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board=True):
