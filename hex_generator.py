@@ -52,11 +52,14 @@ def read_board_from_text_file(file_name):
     return board
         
 
-def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board_padding=None, pointy_top=True, trim_board=True):
+def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board_padding=None, pointy_top=True, trim_board=True, css=None):
     if board_padding is None:
         board_padding = hex_radius
     svg_image = Drawing(file_name)
+
     add_default_styles_to_svg(svg_image)
+    if css is not None:
+        svg_image.add(svg_image.style(css))
 
     hexagons = get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board)
     all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
@@ -119,4 +122,4 @@ def calculate_one_hex_vertices(coordinates, hex_radius, pointy_top):
 
 if __name__ == "__main__":
     simple_board = generate_triangular_board()
-    write_board_to_svg_file(simple_board, 'board.svg')
+    write_board_to_svg_file(simple_board, 'board.svg', css='.background { fill: lime}')
