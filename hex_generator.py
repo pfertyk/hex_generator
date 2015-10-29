@@ -2,24 +2,16 @@ import math
 from lxml import etree
 
 
-def generate_hexagonal_board(width, height):
-    if width % 2 == 0:
-        width = width + 1
-    if height % 2 == 0:
-        height = height + 1
+def generate_hexagonal_board(radius=2):
+    def hex_distance(a, b): return int(abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(a[0] + a[1] - b[0] - b[1])) / 2
 
-    half = int(min(width / 2, height / 2))
+    width = height = 2 * radius + 1
+    board = [[0] * height for _ in range(width)]
+    center = (radius, radius)
 
-    board = [[1 for y in range(height)] for x in range(width)]
-
-    for x in range(half):
-        for y in range(half - x):
-            board[x][y] = 0
-
-    for x in range(width - half, width):
-        for y in range((height - 1) - (x - (width - half)), height):
-            board[x][y] = 0
-
+    for x in range(width):
+        for y in range(height):
+            board[x][y] = int(hex_distance((x, y), center) <= radius)
     return board
 
 
@@ -30,7 +22,7 @@ def generate_triangular_board(edge=7, upper=True):
 
 
 def generate_rhomboidal_board(width=5, height=5):
-    return [[1] * height] * width
+    return [[1] * height for _ in range(width)]
 
 
 def generate_rectangular_board(width=5, height=5, pointy_top=False):
@@ -261,7 +253,7 @@ def create_hex_board_svg(board, hex_radius = 50, hex_offset = 10, board_offset =
 
 
 if __name__ == "__main__":
-    simple_board = generate_triangular_board(5, 3)
+    simple_board = generate_triangular_board(5)
     svg_root = create_hex_board_svg(pointy_top=True, board=simple_board, hex_offset=0, custom_hex_styles={"1":{"fill":"white", "stroke":"black", "stroke-width":"2"}})#, background_color="blue")#, custom_hex_styles={"1":{"fill":"green", "stroke":"lime", "stroke-width":"3"}})
     svg_tree = etree.ElementTree(svg_root)
     svg_tree.write("board.svg", pretty_print=True, xml_declaration=True, encoding="utf-8")

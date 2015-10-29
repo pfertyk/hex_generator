@@ -60,12 +60,14 @@ class BoardGenerationTests(TestCase):
         self.assertEqual(board, expected_board)
 
     def test_generate_board_hexagon(self):
-        board = hg.generate_hexagonal_board(5, 3)
+        board = hg.generate_hexagonal_board(3)
         expected_board = [
-            [0, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 0],
+            [0, 0, 0, 1, 1, 1, 1],
+            [0, 0, 1, 1, 1, 1, 1],
+            [0, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 0, 0],
+            [1, 1, 1, 1, 0, 0, 0],
         ]
         self.assertEqual(board, expected_board)
