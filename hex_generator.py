@@ -2,77 +2,76 @@ import math
 from lxml import etree
 
 
-def generate_board(width, height, board_shape="default", pointy_top=False):
-    
-    if board_shape == "default" or board_shape == "rhombus":
-        board = [[1 for y in range(height)] for x in range(width)]
-        
-    elif board_shape == "hexagonal":
-        
-        if width % 2 == 0:
-            width = width + 1
-        if height % 2 == 0:
-            height = height + 1
-        
-        half = int(min(width / 2, height / 2))
-        
-        board = [[1 for y in range(height)] for x in range(width)]
-        
-        for x in range(half):
-            for y in range(half - x):
-                board[x][y] = 0
-        
-        for x in range(width - half, width):
-            for y in range((height - 1) - (x - (width - half)), height):
-                board[x][y] = 0
-    
-    elif board_shape == "triangular":
-        
-        board = [[int(y < width-x) for y in range(width)] for x in range(width)]
-                 
-    elif board_shape == "rectangular":
-        
-        if not pointy_top:
-            width, height = height, width
-        
-        additional_width = int((height + 1) / 2 - 1)
-        
-        board = [[1 for y in range(height)] for x in range(width + additional_width)]
-        
-        for x in range(additional_width):
-            for y in range(2 * (additional_width - x)):
-                board[x][y] = 0
-                
-        for x in range(width, width + additional_width):
-            for y in range(2*(width + additional_width - x), height):
-                board[x][y] = 0
-                
-        if not pointy_top:
-            board = zip(*board)
-            board = [list(x) for x in board]
-        
+def generate_hexagonal_board(width, height):
+    if width % 2 == 0:
+        width = width + 1
+    if height % 2 == 0:
+        height = height + 1
+
+    half = int(min(width / 2, height / 2))
+
+    board = [[1 for y in range(height)] for x in range(width)]
+
+    for x in range(half):
+        for y in range(half - x):
+            board[x][y] = 0
+
+    for x in range(width - half, width):
+        for y in range((height - 1) - (x - (width - half)), height):
+            board[x][y] = 0
+
     return board
 
 
-def save_board_to_file(board, filename):
-    
-    new_board = zip(*board)
-    
-    with open(filename, "w") as board_file:
-        for x in range(len(new_board)):
-            line = " ".join(str(b) for b in new_board[x])
-            board_file.write(line + "\n")
+def generate_triangular_board(width=5, height=5):
+    board = [[int(y < width-x) for y in range(width)] for x in range(width)]
+    return board
 
 
-def load_board_from_file(filename):
-    
-    with open(filename) as f:
+def generate_rhomboidal_board(width=5, height=5):
+    board = [[1 for y in range(height)] for x in range(width)]
+    return board
+
+
+def generate_rectangular_board(width=5, height=5, pointy_top=False):
+    if not pointy_top:
+        width, height = height, width
+
+    additional_width = int((height + 1) / 2 - 1)
+
+    board = [[1 for y in range(height)] for x in range(width + additional_width)]
+
+    for x in range(additional_width):
+        for y in range(2 * (additional_width - x)):
+            board[x][y] = 0
+
+    for x in range(width, width + additional_width):
+        for y in range(2*(width + additional_width - x), height):
+            board[x][y] = 0
+
+    if not pointy_top:
+        board = zip(*board)
+        board = [list(x) for x in board]
+
+    return board
+
+
+def save_board_to_file(board, file_name):
+    board = zip(*board)
+    with open(file_name, 'w') as board_file:
+        for row in board:
+            line = ' '.join(str(field) for field in row)
+            board_file.write(line + '\n')
+
+
+def load_board_from_file(file_name):
+    with open(file_name) as f:
         lines = f.readlines()
     
     board = []    
     
     for line in lines:
-        board.append([int(x) for x in line.split(" ")])
+        board.append([int(x) for x in line.split(' ')])
     
     board = zip(*board)
     
@@ -262,7 +261,7 @@ def create_hex_board_svg(board, hex_radius = 50, hex_offset = 10, board_offset =
 
 
 if __name__ == "__main__":
-    board = generate_board(5, 5, "hexagonal")
+    board = generate_triangular_board(5, 3)
     svg_root = create_hex_board_svg(pointy_top=True, board=board, hex_offset=0, custom_hex_styles={"1":{"fill":"white", "stroke":"black", "stroke-width":"2"}})#, background_color="blue")#, custom_hex_styles={"1":{"fill":"green", "stroke":"lime", "stroke-width":"3"}})
     svg_tree = etree.ElementTree(svg_root)
     svg_tree.write("board.svg", pretty_print=True, xml_declaration=True, encoding="utf-8")
