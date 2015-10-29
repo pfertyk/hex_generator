@@ -47,8 +47,7 @@ def load_board_from_file(file_name):
     return board
         
 
-def get_intermediate_coords(board, pointy_top=False, x_scale = 1., y_scale = 1.):
-    
+def get_intermediate_coords(board, pointy_top=False):
     list_of_coords = []
     
     if pointy_top:
@@ -69,8 +68,6 @@ def get_intermediate_coords(board, pointy_top=False, x_scale = 1., y_scale = 1.)
             if board[x][y] != 0:
                 coord_x = x_axis[0]*x + y_axis[0]*y
                 coord_y = x_axis[1]*x + y_axis[1]*y
-                coord_x *= x_scale
-                coord_y *= y_scale
                 list_of_coords.append((coord_x,coord_y))
     
     return list_of_coords
@@ -167,7 +164,7 @@ def draw_hex_on_svg(svg_root, x, y, hex_radius, pointy_top=False, style_str=""):
     polygon.set("style", style_str)
 
 
-def create_svg_document(board, drawing_params, hex_radius, hex_offset, x_scale, y_scale, pointy_top=False, background_color="white", custom_hex_styles=None):
+def create_svg_document(board, drawing_params, hex_radius, hex_offset, pointy_top=False, background_color="white", custom_hex_styles=None):
     
     svg_root = etree.Element("svg")
     
@@ -204,33 +201,32 @@ def create_svg_document(board, drawing_params, hex_radius, hex_offset, x_scale, 
     for x in range(len(board)):
         for y in range(len(board[0])):
             if board[x][y] != 0:
-                coord_x = x_offset + (x_axis[0]*x + y_axis[0]*y)*scale*x_scale
-                coord_y = y_offset + (x_axis[1]*x + y_axis[1]*y)*scale*y_scale
+                coord_x = x_offset + (x_axis[0]*x + y_axis[0]*y)*scale
+                coord_y = y_offset + (x_axis[1]*x + y_axis[1]*y)*scale
                 style_str = style_strings[str(board[x][y])]
                 draw_hex_on_svg(svg_root, coord_x, coord_y, hex_radius, pointy_top, style_str)
     
     return svg_root 
 
 
-def create_hex_board_svg(board, hex_radius = 50, hex_offset = 10, board_offset = None, pointy_top=False, background_color = "white", custom_hex_styles = None, x_scale = 1., y_scale = 1.):
-    
-    if board_offset == None:
+def create_hex_board_svg(board, hex_radius=50, hex_offset=10, board_offset=None, pointy_top=False, background_color="white", custom_hex_styles=None):
+    if not board_offset:
         board_offset = hex_radius
     
     #TODO: do not use intermediate coords - calculate drawing params from board
-    list_of_coords = get_intermediate_coords(board, pointy_top, x_scale, y_scale)
-    
+    list_of_coords = get_intermediate_coords(board, pointy_top)
     scaled_coords = scale_coordinates(list_of_coords, hex_radius, hex_offset)
-    
     drawing_params = get_drawing_params(scaled_coords, hex_radius, board_offset, pointy_top)
-    
-    svg_root = create_svg_document(board, drawing_params, hex_radius, hex_offset, x_scale, y_scale, pointy_top, background_color, custom_hex_styles)
-    
+    svg_root = create_svg_document(board, drawing_params, hex_radius, hex_offset, pointy_top, background_color, custom_hex_styles)
     return svg_root
 
 
-if __name__ == "__main__":
-    simple_board = generate_triangular_board(5)
-    svg_root = create_hex_board_svg(pointy_top=True, board=simple_board, hex_offset=0, custom_hex_styles={"1":{"fill":"white", "stroke":"black", "stroke-width":"2"}})#, background_color="blue")#, custom_hex_styles={"1":{"fill":"green", "stroke":"lime", "stroke-width":"3"}})
+def export_board_to_svg(board, file_name):
+    svg_root = create_hex_board_svg(pointy_top=True, board=board, hex_offset=0)
     svg_tree = etree.ElementTree(svg_root)
-    svg_tree.write("board.svg", pretty_print=True, xml_declaration=True, encoding="utf-8")
+    svg_tree.write(file_name, pretty_print=True, xml_declaration=True, encoding='utf-8')
+
+
+if __name__ == "__main__":
+    simple_board = generate_triangular_board()
+    export_board_to_svg(simple_board, 'board.svg')
