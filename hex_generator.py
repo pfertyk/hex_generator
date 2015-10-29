@@ -23,14 +23,13 @@ def generate_hexagonal_board(width, height):
     return board
 
 
-def generate_triangular_board(width=5, height=5):
-    board = [[int(y < width-x) for y in range(width)] for x in range(width)]
+def generate_triangular_board(edge=5):
+    board = [[int(y < edge-x) for y in range(edge)] for x in range(edge)]
     return board
 
 
 def generate_rhomboidal_board(width=5, height=5):
-    board = [[1 for y in range(height)] for x in range(width)]
-    return board
+    return [[1] * height] * width
 
 
 def generate_rectangular_board(width=5, height=5, pointy_top=False):
@@ -261,7 +260,7 @@ def create_hex_board_svg(board, hex_radius = 50, hex_offset = 10, board_offset =
 
 
 if __name__ == "__main__":
-    board = generate_triangular_board(5, 3)
-    svg_root = create_hex_board_svg(pointy_top=True, board=board, hex_offset=0, custom_hex_styles={"1":{"fill":"white", "stroke":"black", "stroke-width":"2"}})#, background_color="blue")#, custom_hex_styles={"1":{"fill":"green", "stroke":"lime", "stroke-width":"3"}})
+    simple_board = generate_triangular_board(5, 3)
+    svg_root = create_hex_board_svg(pointy_top=True, board=simple_board, hex_offset=0, custom_hex_styles={"1":{"fill":"white", "stroke":"black", "stroke-width":"2"}})#, background_color="blue")#, custom_hex_styles={"1":{"fill":"green", "stroke":"lime", "stroke-width":"3"}})
     svg_tree = etree.ElementTree(svg_root)
     svg_tree.write("board.svg", pretty_print=True, xml_declaration=True, encoding="utf-8")

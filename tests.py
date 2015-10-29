@@ -1,10 +1,10 @@
 from unittest import TestCase
-from hex_generator import generate_rectangular_board, generate_hexagonal_board, generate_triangular_board, generate_rhomboidal_board
+import hex_generator as hg
 
 
 class BoardGenerationTests(TestCase):
     def test_generate_board_rhombus(self):
-        board = generate_rhomboidal_board(5, 3)
+        board = hg.generate_rhomboidal_board(5, 3)
         expected_board = [
             [1, 1, 1],
             [1, 1, 1],
@@ -15,7 +15,7 @@ class BoardGenerationTests(TestCase):
         self.assertEqual(board, expected_board)
 
     def test_generate_board_rectangle(self):
-        board = generate_rectangular_board(5, 3)
+        board = hg.generate_rectangular_board(5, 3)
         expected_board = [
             [0, 0, 1, 1, 1],
             [0, 0, 1, 1, 1],
@@ -26,7 +26,7 @@ class BoardGenerationTests(TestCase):
         self.assertEqual(board, expected_board)
 
     def test_generate_board_rectangle_pointy_top(self):
-        board = generate_rectangular_board(5, 3, pointy_top=True)
+        board = hg.generate_rectangular_board(5, 3, pointy_top=True)
         expected_board = [
             [0, 0, 1],
             [1, 1, 1],
@@ -38,7 +38,7 @@ class BoardGenerationTests(TestCase):
         self.assertEqual(board, expected_board)
 
     def test_generate_board_triangle(self):
-        board = generate_triangular_board(5, 3)
+        board = hg.generate_triangular_board(5)
         expected_board = [
             [1, 1, 1, 1, 1],
             [1, 1, 1, 1, 0],
@@ -49,7 +49,7 @@ class BoardGenerationTests(TestCase):
         self.assertEqual(board, expected_board)
 
     def test_generate_board_hexagon(self):
-        board = generate_hexagonal_board(5, 3)
+        board = hg.generate_hexagonal_board(5, 3)
         expected_board = [
             [0, 1, 1],
             [1, 1, 1],
