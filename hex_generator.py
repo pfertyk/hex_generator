@@ -23,8 +23,9 @@ def generate_hexagonal_board(width, height):
     return board
 
 
-def generate_triangular_board(edge=5):
-    board = [[int(y < edge-x) for y in range(edge)] for x in range(edge)]
+def generate_triangular_board(edge=7, upper=True):
+    def is_field(x, y): return x + y < edge if upper else x + y + 1 >= edge
+    board = [[int(is_field(x, y)) for y in range(edge)] for x in range(edge)]
     return board
 
 
