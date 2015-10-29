@@ -1,10 +1,9 @@
 from collections import namedtuple
 import math
-from lxml import etree
 from svgwrite import Drawing
 
 
-Hex = namedtuple('Hex', 'vertices type')
+Hexagon = namedtuple('Hex', 'vertices type')
 
 
 def generate_hexagonal_board(radius=2):
@@ -41,197 +40,30 @@ def save_board_to_file(board, file_name):
 def load_board_from_file(file_name):
     with open(file_name) as f:
         lines = f.readlines()
-    
-    board = []    
-    
+    board = []
     for line in lines:
         board.append([int(x) for x in line.split(' ')])
-    
-    board = zip(*board)
-    
+    board = [list(x) for x in zip(*board)]
     return board
         
 
-def get_intermediate_coords(board, pointy_top=False):
-    list_of_coords = []
-    
-    if pointy_top:
-        x_angle = 0
-    else:
-        x_angle = 30
-    
-    y_angle = x_angle + 60
-    
-    x_axis = (math.cos(x_angle * math.pi / 180.0), math.sin(x_angle * math.pi / 180.0))
-    y_axis = (math.cos(y_angle * math.pi / 180.0), math.sin(y_angle * math.pi / 180.0))
-    
-    width = len(board)
-    height = len(board[0])
-    
-    for x in range(width):
-        for y in range(height):
-            if board[x][y] != 0:
-                coord_x = x_axis[0]*x + y_axis[0]*y
-                coord_y = x_axis[1]*x + y_axis[1]*y
-                list_of_coords.append((coord_x, coord_y))
-    
-    return list_of_coords
-
-
-def scale_coordinates(list_of_coords, hex_radius, hex_offset):
-    
-    scaled_coords = []
-    
-    scale = hex_radius*math.sqrt(3) + hex_offset
-    
-    for coords in list_of_coords:
-        scaled_coords.append((coords[0]*scale, coords[1]*scale))
-    
-    return scaled_coords
-
-
-def get_drawing_params(scaled_coords, hex_radius=10, board_offset=None, pointy_top=False):
-    
-    drawing_params = {}
-    
-    if board_offset == None:
+def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_offset=None, pointy_top=True, trim_board=True):
+    if board_offset is None:
         board_offset = hex_radius
-        
-    if pointy_top:
-        radius_x = hex_radius * math.sqrt(3) * 0.5
-        radius_y = hex_radius
-    else:
-        radius_x = hex_radius
-        radius_y = hex_radius * math.sqrt(3) * 0.5
-        
-    min_x = min(coords[0] for coords in scaled_coords)
-    max_x = max(coords[0] for coords in scaled_coords)
-    min_y = min(coords[1] for coords in scaled_coords)
-    max_y = max(coords[1] for coords in scaled_coords)
-    
-    drawing_params["width"] = (max_x - min_x) + 2 * (board_offset + radius_x)
-    drawing_params["height"] = (max_y - min_y) + 2 * (board_offset + radius_y)
-    drawing_params["x_offset"] = -min_x + board_offset + radius_x
-    drawing_params["y_offset"] = -min_y + board_offset + radius_y
-    
-    return drawing_params
-
-
-def create_hex_styles(custom_hex_styles):
-    
-    hex_styles = {"1":{"fill":"white", "stroke-width":"1", "stroke":"black"},
-                 "2":{"fill":"blue", "stroke-width":"1", "stroke":"black"},
-                 "3":{"fill":"green", "stroke-width":"1", "stroke":"black"},
-                 "4":{"fill":"yellow", "stroke-width":"1", "stroke":"black"},
-                 "5":{"fill":"gray", "stroke-width":"1", "stroke":"black"},
-                 "6":{"fill":"black", "stroke-width":"1", "stroke":"black"},
-                 "7":{"fill":"red", "stroke-width":"1", "stroke":"black"},
-                 "8":{"fill":"purple", "stroke-width":"1", "stroke":"black"},
-                 "9":{"fill":"pink", "stroke-width":"1", "stroke":"black"}}
-    
-    style_strings = {}
-    
-    if not custom_hex_styles == None:
-        for k, custom_hex_style in custom_hex_styles.items():
-            if custom_hex_style != None:
-                for key, value in custom_hex_style.items():
-                    hex_styles[k][key] = value
-    
-    for hex_type, hex_style in hex_styles.items():
-        style_str = ";".join(key+":"+value for key,value in hex_style.items())
-        style_strings[hex_type] = style_str
-    
-    return style_strings
-
-
-def draw_hex_on_svg(svg_root, x, y, hex_radius, pointy_top=False, style_str=""):
-
-    if pointy_top:
-        start_angle = 0
-    else:
-        start_angle = 30
-        
-    points = []
-    
-    for i in range(6):
-        angle = start_angle + (360 * i / 6)
-        radian = angle * math.pi / 180.
-        
-        px = x + hex_radius * math.sin(radian)
-        py = y + hex_radius * math.cos(radian)
-        
-        points.append((px, py))
-    
-    points_str = " ".join([",".join([str(x) for x in coords]) for coords in points])
-    
-    polygon = etree.SubElement(svg_root, "polygon")
-    polygon.set("points", points_str)
-    polygon.set("style", style_str)
-
-
-def create_svg_document(board, drawing_params, hex_radius, hex_offset, pointy_top=False, background_color="white", custom_hex_styles=None):
-    
-    svg_root = etree.Element("svg")
-    
-    width = int(drawing_params["width"])
-    height = int(drawing_params["height"])
-    x_offset = drawing_params["x_offset"]
-    y_offset = drawing_params["y_offset"]
-    
-    svg_root.set("width", str(width))
-    svg_root.set("height", str(height))
-    svg_root.set("version", "1.1")
-    svg_root.set("xmlns", "http://www.w3.org/2000/svg")
-    
-    #TODO: put axis as global and create proper method for turning board coordinates into screen coordinates 
-    rect = etree.SubElement(svg_root, "rect")
-    rect.set("width", str(width))
-    rect.set("height", str(height))
-    rect.set("fill", background_color)
-
-    if pointy_top:
-        x_angle = 0
-    else:
-        x_angle = 30
-    
-    y_angle = x_angle + 60
-    
-    x_axis = (math.cos(x_angle * math.pi / 180.0), math.sin(x_angle * math.pi / 180.0))
-    y_axis = (math.cos(y_angle * math.pi / 180.0), math.sin(y_angle * math.pi / 180.0))
-    
-    scale = hex_radius*math.sqrt(3) + hex_offset
-    
-    style_strings = create_hex_styles(custom_hex_styles)
-    
-    for x in range(len(board)):
-        for y in range(len(board[0])):
-            if board[x][y] != 0:
-                coord_x = x_offset + (x_axis[0]*x + y_axis[0]*y)*scale
-                coord_y = y_offset + (x_axis[1]*x + y_axis[1]*y)*scale
-                style_str = style_strings[str(board[x][y])]
-                draw_hex_on_svg(svg_root, coord_x, coord_y, hex_radius, pointy_top, style_str)
-    
-    return svg_root 
-
-
-def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_offset=None, pointy_top=True, background_color="white"):
-    if not board_offset:
-        board_offset = hex_radius
-    # TODO: do not use intermediate coords - calculate drawing params from board
-    list_of_coords = get_intermediate_coords(board, pointy_top)
-    scaled_coords = scale_coordinates(list_of_coords, hex_radius, hex_offset)
-    drawing_params = get_drawing_params(scaled_coords, hex_radius, board_offset, pointy_top)
-    svg_root = create_svg_document(board, drawing_params, hex_radius, hex_offset, pointy_top, background_color)
-    svg_tree = etree.ElementTree(svg_root)
-    svg_tree.write(file_name, pretty_print=True, xml_declaration=True, encoding='utf-8')
-
     svg_image = Drawing(file_name)
     svg_image.add(svg_image.style('.background { fill: white }'))
     svg_image.add(svg_image.style('.hex_type_0 { fill: black }'))
     svg_image.add(svg_image.style('.hex_type_1 { fill: white; stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.background { fill: #ff00ff }'))
+    svg_image.add(svg_image.style('.hex_type_2 { fill: blue; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_3 { fill: green; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_4 { fill: yellow; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_5 { fill: gray; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_6 { fill: lime; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_7 { fill: red; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_8 { fill: purple; stroke-width: 1; stroke: black }'))
+    svg_image.add(svg_image.style('.hex_type_9 { fill: pink; stroke-width: 1; stroke: black }'))
 
-    hexagons = get_hexes(board, hex_radius, hex_offset, pointy_top, True)
+    hexagons = get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board)
     all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
     min_x = min(v[0] for v in all_vertices)
     min_y = min(v[1] for v in all_vertices)
@@ -245,9 +77,9 @@ def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_off
     svg_image.add(svg_image.rect(size=(board_width, board_height), class_='background'))
     for hexagon in hexagons:
         vertices = [(v[0] + x_offset, v[1] + y_offset) for v in hexagon.vertices]
-        hexagon = Hex(vertices, hexagon.type)
+        hexagon = Hexagon(vertices, hexagon.type)
         svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex_type_' + str(hexagon.type)))
-    # svg_image.save()
+    svg_image.save()
     return svg_image
 
 
@@ -266,7 +98,7 @@ def get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board=True):
             coord_y = (x_axis[1] * x + y_axis[1] * y) * scale
             coordinates = (coord_x, coord_y)
             vertices = calculate_one_hex_vertices(coordinates, hex_radius, pointy_top)
-            hexes.append(Hex(vertices, board[x][y]))
+            hexes.append(Hexagon(vertices, board[x][y]))
 
     return hexes
 
