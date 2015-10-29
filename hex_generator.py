@@ -25,29 +25,6 @@ def generate_rhomboidal_board(width=5, height=5):
     return [[1] * height for _ in range(width)]
 
 
-def generate_rectangular_board(width=5, height=5, pointy_top=False):
-    if not pointy_top:
-        width, height = height, width
-
-    additional_width = int((height + 1) / 2 - 1)
-
-    board = [[1 for y in range(height)] for x in range(width + additional_width)]
-
-    for x in range(additional_width):
-        for y in range(2 * (additional_width - x)):
-            board[x][y] = 0
-
-    for x in range(width, width + additional_width):
-        for y in range(2*(width + additional_width - x), height):
-            board[x][y] = 0
-
-    if not pointy_top:
-        board = zip(*board)
-        board = [list(x) for x in board]
-
-    return board
-
-
 def save_board_to_file(board, file_name):
     board = zip(*board)
     with open(file_name, 'w') as board_file:
