@@ -1,6 +1,10 @@
+from collections import namedtuple
 import math
 from lxml import etree
 from svgwrite import Drawing
+
+
+Hex = namedtuple('Hex', 'vertices type')
 
 
 def generate_hexagonal_board(radius=2):
@@ -213,8 +217,7 @@ def create_svg_document(board, drawing_params, hex_radius, hex_offset, pointy_to
 def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_offset=None, pointy_top=True, background_color="white"):
     if not board_offset:
         board_offset = hex_radius
-
-    #TODO: do not use intermediate coords - calculate drawing params from board
+    # TODO: do not use intermediate coords - calculate drawing params from board
     list_of_coords = get_intermediate_coords(board, pointy_top)
     scaled_coords = scale_coordinates(list_of_coords, hex_radius, hex_offset)
     drawing_params = get_drawing_params(scaled_coords, hex_radius, board_offset, pointy_top)
@@ -222,31 +225,64 @@ def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_off
     svg_tree = etree.ElementTree(svg_root)
     svg_tree.write(file_name, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
-
     svg_image = Drawing(file_name)
     svg_image.add(svg_image.style('.background { fill: white }'))
+    svg_image.add(svg_image.style('.hex_type_0 { fill: black }'))
     svg_image.add(svg_image.style('.hex_type_1 { fill: white; stroke-width: 1; stroke: black }'))
     svg_image.add(svg_image.style('.background { fill: #ff00ff }'))
-    svg_image.add(svg_image.rect(size=(400, 400), class_='background'))
 
-    for coords in scaled_coords:
-        draw_one_hex(svg_image, coords, hex_radius, 1, pointy_top)
+    hexagons = get_hexes(board, hex_radius, hex_offset, pointy_top, True)
+    all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
+    min_x = min(v[0] for v in all_vertices)
+    min_y = min(v[1] for v in all_vertices)
+    max_x = max(v[0] for v in all_vertices)
+    max_y = max(v[1] for v in all_vertices)
+    x_offset = board_offset - min_x
+    y_offset = board_offset - min_y
+
+    board_width = 2 * board_offset + (max_x - min_x)
+    board_height = 2 * board_offset + (max_y - min_y)
+    svg_image.add(svg_image.rect(size=(board_width, board_height), class_='background'))
+    for hexagon in hexagons:
+        vertices = [(v[0] + x_offset, v[1] + y_offset) for v in hexagon.vertices]
+        hexagon = Hex(vertices, hexagon.type)
+        svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex_type_' + str(hexagon.type)))
     # svg_image.save()
     return svg_image
 
 
-def draw_one_hex(svg_image, coordinates, hex_radius, hex_type, pointy_top):
+def get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board=True):
+    hexes = []
+    x_angle = 0 if pointy_top else 30
+    y_angle = x_angle + 60
+    x_axis = (math.cos(x_angle * math.pi / 180.0), math.sin(x_angle * math.pi / 180.0))
+    y_axis = (math.cos(y_angle * math.pi / 180.0), math.sin(y_angle * math.pi / 180.0))
+    scale = hex_radius * math.sqrt(3) + hex_offset
+    for x in range(len(board)):
+        for y in range(len(board[x])):
+            if not board[x][y] and trim_board:
+                continue
+            coord_x = (x_axis[0] * x + y_axis[0] * y) * scale
+            coord_y = (x_axis[1] * x + y_axis[1] * y) * scale
+            coordinates = (coord_x, coord_y)
+            vertices = calculate_one_hex_vertices(coordinates, hex_radius, pointy_top)
+            hexes.append(Hex(vertices, board[x][y]))
+
+    return hexes
+
+
+def calculate_one_hex_vertices(coordinates, hex_radius, pointy_top):
+    vertices = []
     x, y = coordinates
     start_angle = 0 if pointy_top else 30
-    points = []
-
     for i in range(6):
         angle = start_angle + (360 * i / 6)
         radian = angle * math.pi / 180.
         px = x + hex_radius * math.sin(radian)
         py = y + hex_radius * math.cos(radian)
-        points.append((px, py))
-    svg_image.add(svg_image.polygon(points, class_='hex_type_' + str(hex_type)))
+        vertices.append((px, py))
+    return vertices
+
 
 if __name__ == "__main__":
     simple_board = generate_triangular_board()
