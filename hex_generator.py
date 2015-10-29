@@ -56,48 +56,49 @@ def write_board_to_svg_file(
         board, file_name, hex_edge=50, hex_offset=0, board_padding=None, pointy_top=True, trim_board=True, css=None):
     if board_padding is None:
         board_padding = hex_edge
-
     hexagons = transform_board_into_hexagons(board, hex_edge, hex_offset, pointy_top, trim_board)
-
     svg_image = create_svg(css, board_padding, hexagons)
     svg_image.saveas(file_name)
     return svg_image
 
 
-def calculate_board_size(board_padding, hexagons):
-    all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
-    min_x = min(v[0] for v in all_vertices)
-    min_y = min(v[1] for v in all_vertices)
-    max_x = max(v[0] for v in all_vertices)
-    max_y = max(v[1] for v in all_vertices)
-    board_width = 2 * board_padding + (max_x - min_x)
-    board_height = 2 * board_padding + (max_y - min_y)
-    size = (board_width, board_height)
-    return size
+def transform_board_into_hexagons(board, hex_edge, hex_offset, pointy_top, trim_board=True):
+    hexagons = []
+    x_angle = 0 if pointy_top else 30
+    y_angle = x_angle + 60
+    x_axis = (math.cos(x_angle * math.pi / 180.0), math.sin(x_angle * math.pi / 180.0))
+    y_axis = (math.cos(y_angle * math.pi / 180.0), math.sin(y_angle * math.pi / 180.0))
+    scale = hex_edge * math.sqrt(3) + hex_offset
+    for x in range(len(board)):
+        for y in range(len(board[x])):
+            if not board[x][y] and trim_board:
+                continue
+            coord_x = (x_axis[0] * x + y_axis[0] * y) * scale
+            coord_y = (x_axis[1] * x + y_axis[1] * y) * scale
+            coordinates = (coord_x, coord_y)
+            vertices = calculate_vertices_for_one_hexagon(coordinates, hex_edge, pointy_top)
+            hexagons.append(Hexagon(vertices, board[x][y]))
+
+    return hexagons
 
 
-def calculate_offset(hexagons, board_padding):
-    all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
-    min_x = min(v[0] for v in all_vertices)
-    min_y = min(v[1] for v in all_vertices)
-    x_offset = board_padding - min_x
-    y_offset = board_padding - min_y
-    offset = (x_offset, y_offset)
-    return offset
-
-
-def move_hexagons_by_offset(hexagons, offset):
-    new_hexagons = []
-    for hexagon in hexagons:
-        vertices = [(v[0] + offset[0], v[1] + offset[1]) for v in hexagon.vertices]
-        new_hexagons.append(Hexagon(vertices, hexagon.type))
-    return new_hexagons
+def calculate_vertices_for_one_hexagon(center, edge, pointy_top):
+    vertices = []
+    x, y = center
+    start_angle = 0 if pointy_top else 30
+    for i in range(6):
+        angle = start_angle + (360 * i / 6)
+        radian = angle * math.pi / 180.
+        px = x + edge * math.sin(radian)
+        py = y + edge * math.cos(radian)
+        vertices.append((px, py))
+    return vertices
 
 
 def create_svg(css, padding, hexagons):
     offset = calculate_offset(hexagons, padding)
-    size = calculate_board_size(padding, hexagons)
     hexagons = move_hexagons_by_offset(hexagons, offset)
+    size = calculate_board_size(hexagons, padding)
 
     svg_image = Drawing()
 
@@ -113,37 +114,31 @@ def create_svg(css, padding, hexagons):
     return svg_image
 
 
-def transform_board_into_hexagons(board, hex_radius, hex_offset, pointy_top, trim_board=True):
-    hexes = []
-    x_angle = 0 if pointy_top else 30
-    y_angle = x_angle + 60
-    x_axis = (math.cos(x_angle * math.pi / 180.0), math.sin(x_angle * math.pi / 180.0))
-    y_axis = (math.cos(y_angle * math.pi / 180.0), math.sin(y_angle * math.pi / 180.0))
-    scale = hex_radius * math.sqrt(3) + hex_offset
-    for x in range(len(board)):
-        for y in range(len(board[x])):
-            if not board[x][y] and trim_board:
-                continue
-            coord_x = (x_axis[0] * x + y_axis[0] * y) * scale
-            coord_y = (x_axis[1] * x + y_axis[1] * y) * scale
-            coordinates = (coord_x, coord_y)
-            vertices = calculate_one_hex_vertices(coordinates, hex_radius, pointy_top)
-            hexes.append(Hexagon(vertices, board[x][y]))
-
-    return hexes
+def calculate_offset(hexagons, board_padding):
+    all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
+    min_x = min(v[0] for v in all_vertices)
+    min_y = min(v[1] for v in all_vertices)
+    x_offset = board_padding - min_x
+    y_offset = board_padding - min_y
+    offset = (x_offset, y_offset)
+    return offset
 
 
-def calculate_one_hex_vertices(coordinates, hex_radius, pointy_top):
-    vertices = []
-    x, y = coordinates
-    start_angle = 0 if pointy_top else 30
-    for i in range(6):
-        angle = start_angle + (360 * i / 6)
-        radian = angle * math.pi / 180.
-        px = x + hex_radius * math.sin(radian)
-        py = y + hex_radius * math.cos(radian)
-        vertices.append((px, py))
-    return vertices
+def calculate_board_size(hexagons, board_padding):
+    all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
+    max_x = max(v[0] for v in all_vertices)
+    max_y = max(v[1] for v in all_vertices)
+    board_width = max_x + board_padding
+    board_height = max_y + board_padding
+    return board_width, board_height
+
+
+def move_hexagons_by_offset(hexagons, offset):
+    new_hexagons = []
+    for hexagon in hexagons:
+        vertices = [(v[0] + offset[0], v[1] + offset[1]) for v in hexagon.vertices]
+        new_hexagons.append(Hexagon(vertices, hexagon.type))
+    return new_hexagons
 
 
 if __name__ == "__main__":
