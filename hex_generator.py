@@ -92,7 +92,7 @@ def create_svg(styles, size, hexagons):
         svg_image.add(svg_image.style(style))
     svg_image.add(svg_image.rect(size=size, class_='background'))
     for hexagon in hexagons:
-        svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex-field hex-field-' + str(hexagon.type)))
+        svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex-field hex-field-%d' % hexagon.type))
     return svg_image
 
 
