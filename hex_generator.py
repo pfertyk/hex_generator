@@ -52,9 +52,9 @@ def read_board_from_text_file(file_name):
     return board
         
 
-def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board_offset=None, pointy_top=True, trim_board=True):
-    if board_offset is None:
-        board_offset = hex_radius
+def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board_padding=None, pointy_top=True, trim_board=True):
+    if board_padding is None:
+        board_padding = hex_radius
     svg_image = Drawing(file_name)
     add_default_styles_to_svg(svg_image)
 
@@ -64,11 +64,11 @@ def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board
     min_y = min(v[1] for v in all_vertices)
     max_x = max(v[0] for v in all_vertices)
     max_y = max(v[1] for v in all_vertices)
-    x_offset = board_offset - min_x
-    y_offset = board_offset - min_y
+    x_offset = board_padding - min_x
+    y_offset = board_padding - min_y
 
-    board_width = 2 * board_offset + (max_x - min_x)
-    board_height = 2 * board_offset + (max_y - min_y)
+    board_width = 2 * board_padding + (max_x - min_x)
+    board_height = 2 * board_padding + (max_y - min_y)
     svg_image.add(svg_image.rect(size=(board_width, board_height), class_='background'))
     for hexagon in hexagons:
         vertices = [(v[0] + x_offset, v[1] + y_offset) for v in hexagon.vertices]
