@@ -1,5 +1,6 @@
 import math
 from lxml import etree
+from svgwrite import Drawing
 
 
 def generate_hexagonal_board(radius=2):
@@ -68,7 +69,7 @@ def get_intermediate_coords(board, pointy_top=False):
             if board[x][y] != 0:
                 coord_x = x_axis[0]*x + y_axis[0]*y
                 coord_y = x_axis[1]*x + y_axis[1]*y
-                list_of_coords.append((coord_x,coord_y))
+                list_of_coords.append((coord_x, coord_y))
     
     return list_of_coords
 
@@ -209,22 +210,26 @@ def create_svg_document(board, drawing_params, hex_radius, hex_offset, pointy_to
     return svg_root 
 
 
-def create_hex_board_svg(board, hex_radius=50, hex_offset=10, board_offset=None, pointy_top=False, background_color="white", custom_hex_styles=None):
+def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_offset=None, pointy_top=True, background_color="white"):
     if not board_offset:
         board_offset = hex_radius
-    
+
     #TODO: do not use intermediate coords - calculate drawing params from board
     list_of_coords = get_intermediate_coords(board, pointy_top)
     scaled_coords = scale_coordinates(list_of_coords, hex_radius, hex_offset)
     drawing_params = get_drawing_params(scaled_coords, hex_radius, board_offset, pointy_top)
-    svg_root = create_svg_document(board, drawing_params, hex_radius, hex_offset, pointy_top, background_color, custom_hex_styles)
-    return svg_root
-
-
-def export_board_to_svg(board, file_name):
-    svg_root = create_hex_board_svg(pointy_top=True, board=board, hex_offset=0)
+    svg_root = create_svg_document(board, drawing_params, hex_radius, hex_offset, pointy_top, background_color)
     svg_tree = etree.ElementTree(svg_root)
     svg_tree.write(file_name, pretty_print=True, xml_declaration=True, encoding='utf-8')
+
+
+    svg_image = Drawing(file_name)
+    svg_image.add(svg_image.style('.background { fill: #ff0000 }'))
+    svg_image.add(svg_image.style('.hex_type_1 { fill: #00ff00 }'))
+    svg_image.add(svg_image.style('.background { fill: #ff00ff }'))
+    svg_image.add(svg_image.rect(size=(400, 400), class_='background'))
+    # svg_image.save()
+    return svg_image
 
 
 if __name__ == "__main__":
