@@ -79,18 +79,9 @@ def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board
 
 
 def add_default_styles_to_svg(svg_image):
-    svg_image.add(svg_image.style('.background { fill: white }'))
-    svg_image.add(svg_image.style('.hex-field { stroke-width: 1; stroke: black }'))
-    svg_image.add(svg_image.style('.hex-field-0 { fill: black }'))
-    svg_image.add(svg_image.style('.hex-field-1 { fill: white }'))
-    svg_image.add(svg_image.style('.hex-field-2 { fill: blue }'))
-    svg_image.add(svg_image.style('.hex-field-3 { fill: green }'))
-    svg_image.add(svg_image.style('.hex-field-4 { fill: yellow }'))
-    svg_image.add(svg_image.style('.hex-field-5 { fill: gray }'))
-    svg_image.add(svg_image.style('.hex-field-6 { fill: lime }'))
-    svg_image.add(svg_image.style('.hex-field-7 { fill: red }'))
-    svg_image.add(svg_image.style('.hex-field-8 { fill: purple }'))
-    svg_image.add(svg_image.style('.hex-field-9 { fill: pink }'))
+    svg_image.add(svg_image.style('.background { fill: white } '
+                                  '.hex-field { fill: white; stroke-width: 1; stroke: black } '
+                                  '.hex-field-0 { fill: black }'))
 
 
 def get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board=True):
