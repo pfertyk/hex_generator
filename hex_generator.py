@@ -55,11 +55,12 @@ def read_board_from_text_file(file_name):
 def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board_padding=None, pointy_top=True, trim_board=True, css=None):
     if board_padding is None:
         board_padding = hex_radius
-    svg_image = Drawing(file_name)
 
-    add_default_styles_to_svg(svg_image)
+    styles = ['.background { fill: white } '
+              '.hex-field { fill: white; stroke-width: 1; stroke: black } '
+              '.hex-field-0 { fill: black }']
     if css is not None:
-        svg_image.add(svg_image.style(css))
+        styles.append(css)
 
     hexagons = get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board)
     all_vertices = [v for hexagon in hexagons for v in hexagon.vertices]
@@ -72,19 +73,27 @@ def write_board_to_svg_file(board, file_name, hex_radius=50, hex_offset=0, board
 
     board_width = 2 * board_padding + (max_x - min_x)
     board_height = 2 * board_padding + (max_y - min_y)
-    svg_image.add(svg_image.rect(size=(board_width, board_height), class_='background'))
+    size=(board_width, board_height)
+
+    new_hexagons = []
     for hexagon in hexagons:
         vertices = [(v[0] + x_offset, v[1] + y_offset) for v in hexagon.vertices]
-        hexagon = Hexagon(vertices, hexagon.type)
-        svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex-field hex-field-' + str(hexagon.type)))
-    svg_image.save()
+        new_hexagons.append(Hexagon(vertices, hexagon.type))
+    hexagons = new_hexagons
+
+    svg_image = create_svg(styles, size, hexagons)
+    svg_image.saveas(file_name)
     return svg_image
 
 
-def add_default_styles_to_svg(svg_image):
-    svg_image.add(svg_image.style('.background { fill: white } '
-                                  '.hex-field { fill: white; stroke-width: 1; stroke: black } '
-                                  '.hex-field-0 { fill: black }'))
+def create_svg(styles, size, hexagons):
+    svg_image = Drawing()
+    for style in styles:
+        svg_image.add(svg_image.style(style))
+    svg_image.add(svg_image.rect(size=size, class_='background'))
+    for hexagon in hexagons:
+        svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex-field hex-field-' + str(hexagon.type)))
+    return svg_image
 
 
 def get_hexes(board, hex_radius, hex_offset, pointy_top, trim_board=True):
@@ -121,5 +130,5 @@ def calculate_one_hex_vertices(coordinates, hex_radius, pointy_top):
 
 
 if __name__ == "__main__":
-    simple_board = generate_triangular_board()
-    write_board_to_svg_file(simple_board, 'board.svg', css='.background { fill: lime}')
+    simple_board = generate_hexagonal_board()
+    write_board_to_svg_file(simple_board, 'board.svg', css='.background { fill: navy} .hex-field-1 { fill: yellow}')
