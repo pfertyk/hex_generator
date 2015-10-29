@@ -224,13 +224,29 @@ def export_board_to_svg(board, file_name, hex_radius=50, hex_offset=0, board_off
 
 
     svg_image = Drawing(file_name)
-    svg_image.add(svg_image.style('.background { fill: #ff0000 }'))
-    svg_image.add(svg_image.style('.hex_type_1 { fill: #00ff00 }'))
+    svg_image.add(svg_image.style('.background { fill: white }'))
+    svg_image.add(svg_image.style('.hex_type_1 { fill: white; stroke-width: 1; stroke: black }'))
     svg_image.add(svg_image.style('.background { fill: #ff00ff }'))
     svg_image.add(svg_image.rect(size=(400, 400), class_='background'))
+
+    for coords in scaled_coords:
+        draw_one_hex(svg_image, coords, hex_radius, 1, pointy_top)
     # svg_image.save()
     return svg_image
 
+
+def draw_one_hex(svg_image, coordinates, hex_radius, hex_type, pointy_top):
+    x, y = coordinates
+    start_angle = 0 if pointy_top else 30
+    points = []
+
+    for i in range(6):
+        angle = start_angle + (360 * i / 6)
+        radian = angle * math.pi / 180.
+        px = x + hex_radius * math.sin(radian)
+        py = y + hex_radius * math.cos(radian)
+        points.append((px, py))
+    svg_image.add(svg_image.polygon(points, class_='hex_type_' + str(hex_type)))
 
 if __name__ == "__main__":
     simple_board = generate_triangular_board()
