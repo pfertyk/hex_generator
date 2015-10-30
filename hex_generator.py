@@ -140,7 +140,7 @@ def create_svg_image(styles, board_size, hexagons):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Generate a board with hexagonal fields (as SVG file).')
     parser.add_argument('-o', '--output', help='name of the output file')
     parser.add_argument('-E', '--export', action='store_true',
                         help='instead of generating SVG file, the program will generate text file with a board')
