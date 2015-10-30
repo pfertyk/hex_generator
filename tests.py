@@ -99,3 +99,25 @@ class BoardFileTests(TestCase):
             d.write('test.txt', '0 3 6 9\n1 4\n2 5 8\n', 'utf-8')
             board = hg.read_board_from_text_file(os.path.join(d.path, 'test.txt'))
             self.assertEqual(board, expected_board)
+
+
+class HexagonsTests(TestCase):
+    def test_board_no_trim(self):
+        board = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [0, 0, 8],
+            [9, 0, 0],
+        ]
+        hexagons = hg.transform_board_into_hexagons(board, 1, 1, trim_board=False)
+        self.assertEqual(len(hexagons), 12)
+
+    def test_board_trim(self):
+        board = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [0, 0, 8],
+            [9, 0, 0],
+        ]
+        hexagons = hg.transform_board_into_hexagons(board, 1, 1, trim_board=True)
+        self.assertEqual(len(hexagons), 7)

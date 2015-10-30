@@ -73,7 +73,7 @@ def write_board_to_svg_file(board, file_name, hex_edge=50, hex_offset=0,
     return svg_image
 
 
-def transform_board_into_hexagons(board, hex_edge, hex_offset, pointy_top, trim_board=True):
+def transform_board_into_hexagons(board, hex_edge, hex_offset, pointy_top=True, trim_board=True):
     hexagons = []
     x_axis, y_axis = create_axis(pointy_top)
     scale = hex_edge * math.sqrt(3) + hex_offset
