@@ -13,4 +13,4 @@ This program requires Python 3.x and svgwrite library.
 
 ![Space](examples/board3.png)
 
-An example of exported board can be found in examples/board.txt
+An example of a board text file can be found in examples/board.txt
