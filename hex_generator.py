@@ -156,9 +156,9 @@ def main():
 
     if args.input:
         board = read_board_from_text_file(args.input)
-    elif args.shape == 'rho':
+    elif args.type == 'rho':
         board = generate_rhomboidal_board()
-    elif args.shape == 'tri':
+    elif args.type == 'tri':
         board = generate_triangular_board()
     else:
         board = generate_hexagonal_board()
