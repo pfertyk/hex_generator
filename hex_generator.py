@@ -144,7 +144,7 @@ def main():
     parser.add_argument('-o', '--output', default='board.svg', help='name of the output file')
     parser.add_argument('-i', '--input', help='name of the text file with a board')
 
-    svg_options = parser.add_argument_group('Svg options')
+    svg_options = parser.add_argument_group('SVG options')
     svg_options.add_argument('-e', '--edge', type=int, default=50, help='length (in pixels) of hex edge')
     svg_options.add_argument('-a', '--all', action='store_true', help='show all fields, including 0')
     svg_options.add_argument('-c', '--css', help='css style to be applied to the svg board')
