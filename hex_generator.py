@@ -140,9 +140,17 @@ def create_svg_image(styles, board_size, hexagons):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--type', help='type of the board', choices=['hex', 'rho', 'tri'], default='hex')
-    parser.add_argument('-o', '--output', default='board.svg', help='name of the output file')
-    parser.add_argument('-i', '--input', help='name of the text file with a board')
+    parser.add_argument('-o', '--output', help='name of the output file')
+    parser.add_argument('-E', '--export', action='store_true',
+                        help='instead of generating SVG file, the program will generate text file with a board')
+
+    board_options = parser.add_argument_group('Board options')
+    board_options.add_argument('-i', '--input', help='name of the text file with a board (overrides other options)')
+    board_options.add_argument('-t', '--type', help='type of the board', choices=['hex', 'rho', 'tri'], default='hex')
+    # board_options.add_argument('-r', '--radius', type=int, default=2, help='radius (of hexagonal board)')
+    # board_options.add_argument('-w', '--width', type=int, default=5, help='width (of rhomboidal board)')
+    # # board_options.add_argument('-h', '--height', type=int, default=5, help='height (of rhomboidal board)')
+    # board_options.add_argument('-x', '--xxx', help='xxx (of triangular board)')
 
     svg_options = parser.add_argument_group('SVG options')
     svg_options.add_argument('-e', '--edge', type=int, default=50, help='length (in pixels) of hex edge')
@@ -162,10 +170,14 @@ def main():
         board = generate_triangular_board()
     else:
         board = generate_hexagonal_board()
-    output_file_name = args.output
-    write_board_to_svg_file(board, output_file_name, hex_edge=args.edge, hex_offset=args.spacing,
-                            board_padding=args.padding, pointy_top=not args.flat_top, trim_board=not args.all,
-                            style=args.css)
+
+    if args.export:
+        output_file_name = args.output if args.output else 'board.txt'
+        write_board_to_text_file(board, output_file_name)
+    else:
+        output_file_name = args.output if args.output else 'board.svg'
+        write_board_to_svg_file(board, output_file_name, args.edge, args.spacing, args.padding, not args.flat_top,
+                                not args.all, args.css)
 
 if __name__ == '__main__':
     main()
