@@ -16,11 +16,11 @@ This command will create a hexagonal, black and white board and save it as 'boar
 * adding custom css styles
 * changing the name of the output file
 
-For full list of options, please refer to the program's help (`hex_generator.py -h`).
+For a full list of options, please refer to the program's help (`hex_generator.py -h`).
 
 ## Board import and export
 
-Board can be exported as a text file (using -E flag). For a default board such a file will look like this:
+Hex Generator can export a board as a text file (using `-E` flag). For a default board such a file will look like this:
 
 ```
 0 0 1 1 1
@@ -28,13 +28,13 @@ Board can be exported as a text file (using -E flag). For a default board such a
 1 1 1 1 1
 1 1 1 1 0
 1 1 1 0 0
-
 ```
 
-Each number represents one field. By default type 0 means that a field is absent.
+Each number represents one field. It also defines the type of a field. By default type 0 means that a field is absent (it will not be displayed in a SVG file, unless option `-a` is used).
 
+After a text file is exported, it can be modified manually to change the layout of a board or the type of fields. Non-negative integers should be used as field type. Fields in one row should be separated by spaces, rows should be separated by newlines. Using rows of equal length is recommended, but not required.
 
-A text file can then be imported by the program using `-i FILENAME`.
+A modified text file can then be imported by the program using `-i FILENAME`. Hex Generator will interpret it as a 2 dimensional array of fields using [axial coordinates](http://www.redblobgames.com/grids/hexagons/#coordinates).
 
 ## Examples
 ![Space](examples/board1.png)
