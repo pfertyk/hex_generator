@@ -147,10 +147,11 @@ def main():
     board_options = parser.add_argument_group('Board options')
     board_options.add_argument('-i', '--input', help='name of the text file with a board (overrides other options)')
     board_options.add_argument('-t', '--type', help='type of the board', choices=['hex', 'rho', 'tri'], default='hex')
-    # board_options.add_argument('-r', '--radius', type=int, default=2, help='radius (of hexagonal board)')
-    # board_options.add_argument('-w', '--width', type=int, default=5, help='width (of rhomboidal board)')
-    # # board_options.add_argument('-h', '--height', type=int, default=5, help='height (of rhomboidal board)')
-    # board_options.add_argument('-x', '--xxx', help='xxx (of triangular board)')
+    board_options.add_argument('-R', '--radius', type=int, default=2, help='radius (hexagonal board)')
+    board_options.add_argument('-W', '--width', type=int, default=5, help='width (rhomboidal board)')
+    board_options.add_argument('-H', '--height', type=int, default=5, help='height (rhomboidal board)')
+    board_options.add_argument('-S', '--size', type=int, default=7, help='edge size (triangular board)')
+    board_options.add_argument('-M', '--mirrored', action='store_true', help='mirrors the board (triangular board)')
 
     svg_options = parser.add_argument_group('SVG options')
     svg_options.add_argument('-e', '--edge', type=int, default=50, help='length (in pixels) of hex edge')
@@ -165,11 +166,11 @@ def main():
     if args.input:
         board = read_board_from_text_file(args.input)
     elif args.type == 'rho':
-        board = generate_rhomboidal_board()
+        board = generate_rhomboidal_board(args.width, args.height)
     elif args.type == 'tri':
-        board = generate_triangular_board()
+        board = generate_triangular_board(args.size, not args.mirrored)
     else:
-        board = generate_hexagonal_board()
+        board = generate_hexagonal_board(args.radius)
 
     if args.export:
         output_file_name = args.output if args.output else 'board.txt'
