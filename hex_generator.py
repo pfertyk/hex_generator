@@ -1,3 +1,4 @@
+import argparse
 from collections import namedtuple
 import math
 from svgwrite import Drawing
@@ -137,6 +138,34 @@ def create_svg_image(styles, board_size, hexagons):
     return svg_image
 
 
-if __name__ == "__main__":
-    simple_board = generate_triangular_board(4)
-    write_board_to_svg_file(simple_board, 'board.svg', style='.board { fill: navy} .hex-field-1 { fill: orange}')
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--type', help='type of the board', choices=['hex', 'rho', 'tri'], default='hex')
+    parser.add_argument('-o', '--output', default='board.svg', help='name of the output file')
+    parser.add_argument('-i', '--input', help='name of the text file with a board')
+
+    svg_options = parser.add_argument_group('Svg options')
+    svg_options.add_argument('-e', '--edge', type=int, default=50, help='length (in pixels) of hex edge')
+    svg_options.add_argument('-a', '--all', action='store_true', help='show all fields, including 0')
+    svg_options.add_argument('-c', '--css', help='css style to be applied to the svg board')
+    svg_options.add_argument('-f', '--flat-top', action='store_true', help='changes hex orientation to vertical')
+    svg_options.add_argument('-p', '--padding', type=int, help='board padding (in pixels)')
+    svg_options.add_argument('-s', '--spacing', type=int, default=0, help='spacing (in pixels) between hexes')
+
+    args = parser.parse_args()
+
+    if args.input:
+        board = read_board_from_text_file(args.input)
+    elif args.shape == 'rho':
+        board = generate_rhomboidal_board()
+    elif args.shape == 'tri':
+        board = generate_triangular_board()
+    else:
+        board = generate_hexagonal_board()
+    output_file_name = args.output
+    write_board_to_svg_file(board, output_file_name, hex_edge=args.edge, hex_offset=args.spacing,
+                            board_padding=args.padding, pointy_top=not args.flat_top, trim_board=not args.all,
+                            style=args.css)
+
+if __name__ == '__main__':
+    main()
