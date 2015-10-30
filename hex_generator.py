@@ -154,11 +154,11 @@ def main():
 
     svg_options = parser.add_argument_group('SVG options')
     svg_options.add_argument('-e', '--edge', type=int, default=50, help='length (in pixels) of hex edge')
+    svg_options.add_argument('-s', '--spacing', type=int, default=0, help='spacing (in pixels) between hexes')
+    svg_options.add_argument('-p', '--padding', type=int, help='board padding (in pixels)')
+    svg_options.add_argument('-f', '--flat-top', action='store_true', help='changes hex orientation to vertical')
     svg_options.add_argument('-a', '--all', action='store_true', help='show all fields, including 0')
     svg_options.add_argument('-c', '--css', help='css style to be applied to the svg board')
-    svg_options.add_argument('-f', '--flat-top', action='store_true', help='changes hex orientation to vertical')
-    svg_options.add_argument('-p', '--padding', type=int, help='board padding (in pixels)')
-    svg_options.add_argument('-s', '--spacing', type=int, default=0, help='spacing (in pixels) between hexes')
 
     args = parser.parse_args()
 
