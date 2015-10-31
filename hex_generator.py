@@ -88,6 +88,15 @@ def write_board_to_svg_file(board, file_name, hex_edge=50, hex_offset=0,
                             board_padding=None, pointy_top=True, trim_board=True, style=None):
     """
     Writes given board to a svg file of given name.
+
+    :param board: 2 dimensional list of fields, each represented as a number
+    :param file_name name of the output file
+    :param hex_edge: length of hexagon's side (in pixels)
+    :param hex_offset: distance between side of one hexagon and its neighbour (in pixels)
+    :param board_padding padding of the board (in pixels)
+    :param pointy_top: specifies if hexagons should be pointy topped or flat topped
+    :param trim_board: if True, fields with a value 0 will be removed during transformation
+    :param style css style (as string)
     """
     if board_padding is None:
         board_padding = hex_edge
@@ -214,7 +223,7 @@ def create_svg_image(styles, board_size, hexagons):
     All hexagonal fields can be styled using '.hex-field'. Fields can be also
     styled using 'hex-field-X', where X is the type of the field.
     :param styles iterable of css styles (strings)
-    :param board_size tuple representing board size as (width, height)
+    :param board_size tuple representing board size (width, height)
     :param hexagons iterable of hexagons (tuples in a form of (vertices, type) )
     :returns SVG Drawing object
     """
@@ -251,7 +260,9 @@ def main():
     svg_options.add_argument('-p', '--padding', type=int, help='board padding (in pixels)')
     svg_options.add_argument('-f', '--flat-top', action='store_true', help='changes hex orientation to vertical')
     svg_options.add_argument('-a', '--all', action='store_true', help='show all fields, including 0')
-    svg_options.add_argument('-c', '--css', help='a string containing a css style to be applied to the svg board')
+    svg_options.add_argument('-c', '--css', help='a string containing a css style to be applied to the svg file. '
+                                                 'Background can be styled using ".board". Fields can be styled using '
+                                                 '".hex-field" (all fields) and .hex-field-X (fields of type X).')
 
     args = parser.parse_args()
 
