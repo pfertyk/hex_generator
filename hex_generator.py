@@ -40,7 +40,7 @@ def generate_triangular_board(edge=7, mirrored=False):
     return board
 
 
-def generate_rhomboidal_board(width=5, height=5):
+def generate_parallelogrammatic_board(width=5, height=5):
     """
     Creates a board with a shape of a parallelogram.
 
@@ -238,10 +238,10 @@ def main():
 
     board_options = parser.add_argument_group('Board options')
     board_options.add_argument('-i', '--input', help='name of the text file with a board (overrides other options)')
-    board_options.add_argument('-t', '--type', help='type of the board', choices=['hex', 'rho', 'tri'], default='hex')
+    board_options.add_argument('-t', '--type', help='type of the board', choices=['hex', 'par', 'tri'], default='hex')
     board_options.add_argument('-R', '--radius', type=int, default=2, help='radius (hexagonal board)')
-    board_options.add_argument('-W', '--width', type=int, default=5, help='width (rhomboidal board)')
-    board_options.add_argument('-H', '--height', type=int, default=5, help='height (rhomboidal board)')
+    board_options.add_argument('-W', '--width', type=int, default=5, help='width (parallelogrammatic board)')
+    board_options.add_argument('-H', '--height', type=int, default=5, help='height (parallelogrammatic board)')
     board_options.add_argument('-S', '--size', type=int, default=7, help='edge size (triangular board)')
     board_options.add_argument('-M', '--mirrored', action='store_true', help='mirrors the board (triangular board)')
 
@@ -251,14 +251,14 @@ def main():
     svg_options.add_argument('-p', '--padding', type=int, help='board padding (in pixels)')
     svg_options.add_argument('-f', '--flat-top', action='store_true', help='changes hex orientation to vertical')
     svg_options.add_argument('-a', '--all', action='store_true', help='show all fields, including 0')
-    svg_options.add_argument('-c', '--css', help='css style to be applied to the svg board')
+    svg_options.add_argument('-c', '--css', help='a string containing a css style to be applied to the svg board')
 
     args = parser.parse_args()
 
     if args.input:
         board = read_board_from_text_file(args.input)
     elif args.type == 'rho':
-        board = generate_rhomboidal_board(args.width, args.height)
+        board = generate_parallelogrammatic_board(args.width, args.height)
     elif args.type == 'tri':
         board = generate_triangular_board(args.size, args.mirrored)
     else:

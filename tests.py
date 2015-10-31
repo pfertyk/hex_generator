@@ -6,8 +6,8 @@ import hex_generator as hg
 
 
 class BoardGenerationTests(TestCase):
-    def test_generate_board_rhombus(self):
-        board = hg.generate_rhomboidal_board(5, 3)
+    def test_generate_board_parallelogram(self):
+        board = hg.generate_parallelogrammatic_board(5, 3)
         expected_board = [
             [1, 1, 1],
             [1, 1, 1],
