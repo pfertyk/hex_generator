@@ -37,8 +37,9 @@ After a text file is exported, it can be modified manually to change the layout 
 A modified text file can then be imported by the program (`-i FILENAME`). Hex Generator will parse it using [axial coordinates](http://www.redblobgames.com/grids/hexagons/#coordinates) and apply css styles to different types of fields (if css style was defined with `-c`). Fields can be styled using `.hex-field` (for all fields) and `.hex-field-X` (for fields of type X).
 
 ## Samples
-![Space](examples/board1.png)
 
-![Space](examples/board2.png)
+![Space](samples/board1.png)
 
-![Space](examples/board3.png)
+![Terrain](samples/board2.png)
+
+![Volcano](samples/board3.png)
