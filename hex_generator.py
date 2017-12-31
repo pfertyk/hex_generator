@@ -268,7 +268,7 @@ def main():
 
     if args.input:
         board = read_board_from_text_file(args.input)
-    elif args.type == 'rho':
+    elif args.type == 'par':
         board = generate_parallelogrammatic_board(args.width, args.height)
     elif args.type == 'tri':
         board = generate_triangular_board(args.size, args.mirrored)
