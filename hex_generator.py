@@ -4,7 +4,7 @@ from collections import namedtuple
 import math
 from svgwrite import Drawing
 
-Hexagon = namedtuple('Hex', 'vertices type')
+Hexagon = namedtuple('Hex', 'vertices position')
 
 
 def generate_hexagonal_board(radius=2):
@@ -113,7 +113,7 @@ def write_board_to_svg_file(board, file_name, hex_edge=50, hex_offset=0,
     board_size = (2 * board_padding + max_x - min_x, 2 * board_padding + max_y - min_y)
 
     svg_image = create_svg_image(styles, board_size, hexagons)
-    svg_image.saveas(file_name)
+    svg_image.saveas(file_name, pretty=True)
     return svg_image
 
 
@@ -138,8 +138,8 @@ def transform_board_into_hexagons(board, hex_edge, hex_offset, pointy_top=True, 
             coord_x = (x_axis[0] * x + y_axis[0] * y) * scale
             coord_y = (x_axis[1] * x + y_axis[1] * y) * scale
             hex_center = (coord_x, coord_y)
-            vertices = calculate_vertices_for_one_hexagon(hex_center, hex_edge, pointy_top)
-            hexagons.append(Hexagon(vertices, board[x][y]))
+            vertices = calculate_vertices_for_one_hexagon((0, 0), hex_edge, pointy_top)
+            hexagons.append(Hexagon(vertices, hex_center))
     return hexagons
 
 
@@ -191,7 +191,10 @@ def calculate_bounding_box(hexagons):
     :param hexagons iterable of hexagons (tuples in a form of (vertices, type) )
     :returns MBB as a tuple (min_x, min_y, max_x, max_y)
     """
-    vertices = [vertex for hexagon in hexagons for vertex in hexagon.vertices]
+    vertices = [
+        tuple(sum(c) for c in zip(vertex, hexagon.position))
+        for hexagon in hexagons for vertex in hexagon.vertices
+    ]
     min_x = min(v[0] for v in vertices)
     min_y = min(v[1] for v in vertices)
     max_x = max(v[0] for v in vertices)
@@ -209,8 +212,10 @@ def move_hexagons_by_offset(hexagons, offset):
     """
     moved_hexagons = []
     for hexagon in hexagons:
-        vertices = [(v[0] + offset[0], v[1] + offset[1]) for v in hexagon.vertices]
-        moved_hexagons.append(Hexagon(vertices, hexagon.type))
+        position = (
+            hexagon.position[0] + offset[0], hexagon.position[1] + offset[1]
+        )
+        moved_hexagons.append(Hexagon(hexagon.vertices, position))
     return moved_hexagons
 
 
@@ -227,12 +232,14 @@ def create_svg_image(styles, board_size, hexagons):
     :param hexagons iterable of hexagons (tuples in a form of (vertices, type) )
     :returns SVG Drawing object
     """
-    svg_image = Drawing()
-    for style in styles:
-        svg_image.add(svg_image.style(style))
-    svg_image.add(svg_image.rect(size=board_size, class_='board'))
-    for hexagon in hexagons:
-        svg_image.add(svg_image.polygon(hexagon.vertices, class_='hex-field hex-field-%d' % hexagon.type))
+    svg_image = Drawing(viewBox=" ".join(str(i) for i in (0, 0) + board_size))
+    for i, hexagon in enumerate(hexagons):
+        group = svg_image.g(id_="hex-group-{}".format(i))
+        group.translate(*hexagon.position)
+        group.add(svg_image.polygon(
+            hexagon.vertices, class_="hex-field", id_="hex-field-{}".format(i)
+        ))
+        svg_image.add(group)
     return svg_image
 
 
